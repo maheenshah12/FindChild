@@ -109,14 +109,6 @@ NEXT_PUBLIC_API_URL=http://localhost:8001
 
 **Note:** Twilio sandbox has a 5 messages/day limit. Upgrade to production for unlimited messages.
 
-## 🔐 Admin Access
-
-For testing purposes, case status updates require a password:
-
-**Password:** `admin123`
-
-This is a simple password protection for testing. For production, implement proper authentication with user roles.
-
 ## 🚢 Deployment
 
 ### Deploy to Railway
@@ -175,10 +167,6 @@ Contributions are welcome! Please follow these steps:
 3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
-
-## 📝 License
-
-This project is licensed under the MIT License.
 
 ## ⚠️ Important Notice
 
