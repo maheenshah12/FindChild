@@ -10,3 +10,4 @@ groq==0.4.1
 pillow==10.2.0
 httpx==0.26.0
 cloudinary==1.36.0
+certifi==2024.2.2

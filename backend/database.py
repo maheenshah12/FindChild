@@ -1,16 +1,11 @@
 from motor.motor_asyncio import AsyncIOMotorClient
 from config import settings
-import ssl
+import certifi
 
-# Configure SSL for MongoDB Atlas
-ssl_context = ssl.create_default_context()
-ssl_context.check_hostname = False
-ssl_context.verify_mode = ssl.CERT_NONE
-
+# Use certifi's CA bundle for MongoDB Atlas SSL/TLS
 client = AsyncIOMotorClient(
     settings.mongodb_url,
-    tls=True,
-    tlsAllowInvalidCertificates=True
+    tlsCAFile=certifi.where()
 )
 db = client.findchildd
 

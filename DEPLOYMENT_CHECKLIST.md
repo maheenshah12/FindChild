@@ -49,10 +49,12 @@ git commit -m "Clean up codebase: Remove Twilio, add form validation, improve Wh
 git push origin main
 ```
 
-## Deployment to Railway/Render
+## Deployment to Hugging Face Spaces & Vercel
 
-### Backend Environment Variables
-Set these in your deployment platform:
+See [HUGGINGFACE_DEPLOYMENT.md](./HUGGINGFACE_DEPLOYMENT.md) for detailed deployment instructions.
+
+### Backend Environment Variables (Hugging Face Spaces)
+Set these secrets in your Space settings:
 
 ```
 MONGODB_URL=mongodb+srv://...
@@ -63,22 +65,23 @@ WAAPI_INSTANCE_URL=https://waapi.app/api/v1/instances/YOUR_ID
 CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
-BACKEND_PORT=8001
 ALERT_PHONE_NUMBERS=923001234567,923009876543
 ```
 
-### Frontend Environment Variables
+### Frontend Environment Variables (Vercel)
 ```
-NEXT_PUBLIC_API_URL=https://your-backend-url.railway.app
+NEXT_PUBLIC_API_URL=https://YOUR_USERNAME-findchildd-backend.hf.space
 ```
 
 ### CORS Configuration
-Update `main.py` line 36-41 to include your deployed frontend URL:
+Update `main.py` to include your deployed Vercel URL:
 ```python
 allow_origins=[
     "http://localhost:3000",
     "http://localhost:3001",
-    "https://your-frontend-url.vercel.app",  # Add your deployed URL
+    "https://your-project.vercel.app",  # Add your Vercel URL
+    "https://*.vercel.app",
+    "https://*.hf.space",
 ],
 ```
 

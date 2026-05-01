@@ -6,6 +6,8 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.109-green)](https://fastapi.tiangolo.com/)
 [![Python](https://img.shields.io/badge/Python-3.11+-blue)](https://www.python.org/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-green)](https://www.mongodb.com/)
+[![Deployed on Hugging Face](https://img.shields.io/badge/🤗-Hugging%20Face-yellow)](https://huggingface.co/spaces)
+[![Deployed on Vercel](https://img.shields.io/badge/▲-Vercel-black)](https://vercel.com)
 
 ## 🌟 Features
 
@@ -135,16 +137,38 @@ Images are automatically uploaded to Cloudinary for reliable WhatsApp delivery:
 
 ## 🚢 Deployment
 
-### Deploy to Railway
+### Backend - Hugging Face Spaces
 
-See [RAILWAY_DEPLOYMENT.md](./RAILWAY_DEPLOYMENT.md) for detailed deployment instructions.
+The backend is deployed on Hugging Face Spaces, which provides free hosting for ML/AI applications:
 
-**Quick Deploy:**
-1. Push code to GitHub
-2. Create Railway project
-3. Deploy backend and frontend as separate services
-4. Set environment variables in Railway dashboard
-5. Update CORS origins in backend
+1. Create a new Space on [Hugging Face](https://huggingface.co/spaces)
+2. Select "Docker" as the SDK
+3. Push your backend code with the Dockerfile
+4. Configure secrets in Space settings:
+   - `MONGODB_URL`
+   - `GROQ_API_KEY`
+   - `WAAPI_TOKEN`
+   - `WAAPI_INSTANCE_URL`
+   - `CLOUDINARY_CLOUD_NAME`
+   - `CLOUDINARY_API_KEY`
+   - `CLOUDINARY_API_SECRET`
+   - `ALERT_PHONE_NUMBERS`
+5. Space will automatically build and deploy
+
+**Note:** Hugging Face Spaces run on port 7860 by default. The backend is configured to use this port.
+
+### Frontend - Vercel
+
+The frontend is deployed on Vercel for optimal Next.js performance:
+
+1. Push your code to GitHub
+2. Import project on [Vercel](https://vercel.com)
+3. Select the `frontend` directory as the root
+4. Add environment variable:
+   - `NEXT_PUBLIC_API_URL` (your Hugging Face Space URL)
+5. Deploy
+
+**CORS Configuration:** Make sure to add your Vercel domain to the CORS allowed origins in `backend/main.py`
 
 ## 📁 Project Structure
 
@@ -205,7 +229,8 @@ Contributions are welcome! Please follow these steps:
 - [Groq](https://groq.com/) - AI processing
 - [Cloudinary](https://cloudinary.com/) - Image hosting
 - [MongoDB Atlas](https://www.mongodb.com/atlas) - Database hosting
-- [Railway](https://railway.app/) - Deployment platform
+- [Hugging Face Spaces](https://huggingface.co/spaces) - Backend hosting
+- [Vercel](https://vercel.com/) - Frontend hosting
 
 ## 📧 Contact
 
