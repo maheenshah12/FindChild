@@ -147,7 +147,7 @@ export default function ReportPage() {
         </div>
       </section>
 
-      {/* Form */}
+      {/* Form Section */}
       <section className="container mx-auto px-6 py-16 pb-32">
         <div
           ref={form.ref}
