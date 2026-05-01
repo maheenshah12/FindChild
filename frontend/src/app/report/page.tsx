@@ -14,7 +14,7 @@ export default function ReportPage() {
   const [preview, setPreview] = useState<string | null>(null)
 
   const header = useScrollAnimation()
-  const form = useScrollAnimation<HTMLFormElement>()
+  const form = useScrollAnimation()
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -149,13 +149,16 @@ export default function ReportPage() {
 
       {/* Form */}
       <section className="container mx-auto px-6 py-16 pb-32">
-        <form
+        <div
           ref={form.ref}
-          onSubmit={handleSubmit}
-          className={`max-w-3xl mx-auto transition-all duration-1000 delay-200 ${
+          className={`transition-all duration-1000 delay-200 ${
             form.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
         >
+          <form
+            onSubmit={handleSubmit}
+            className="max-w-3xl mx-auto"
+          >
           {/* Child Information */}
           <div className="mb-16">
             <h3 className="text-2xl font-bold mb-8 text-gray-900">
@@ -347,6 +350,7 @@ export default function ReportPage() {
             </p>
           </div>
         </form>
+        </div>
       </section>
     </div>
   )
