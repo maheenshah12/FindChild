@@ -40,6 +40,7 @@ app.add_middleware(
         "https://*.railway.app",         # Railway alternative
         "https://*.onrender.com",        # Render frontend
         "https://*.vercel.app",          # Vercel frontend
+        "https://*.hf.space",            # Hugging Face Spaces
     ],
     allow_credentials=True,
     allow_methods=["*"],
