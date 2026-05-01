@@ -36,8 +36,9 @@ app.add_middleware(
         "http://localhost:3000",
         "http://localhost:3001",
         "http://localhost:3002",
-        "https://*.up.railway.app",  # Allow all Railway frontend URLs
-        "https://*.railway.app",      # Alternative Railway domain
+        "https://*.up.railway.app",     # Railway frontend
+        "https://*.railway.app",         # Railway alternative domain
+        "https://*.onrender.com",        # Render frontend
     ],
     allow_credentials=True,
     allow_methods=["*"],
