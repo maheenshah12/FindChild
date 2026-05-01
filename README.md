@@ -12,6 +12,7 @@
 - **Instant Alert System** - AI-generated alerts distributed via WhatsApp within seconds
 - **Community Network** - Connect volunteers and local communities for coordinated search efforts
 - **Real-time Updates** - Track case status and receive community responses
+- **Image Support** - Upload child photos with automatic cloud hosting via Cloudinary
 - **Mobile-First Design** - Beautiful, responsive interface inspired by modern design principles
 - **Secure & Private** - Password-protected admin functions and encrypted data storage
 
@@ -21,13 +22,14 @@
 - **Next.js 14** - React framework with App Router
 - **TypeScript** - Type-safe development
 - **Tailwind CSS** - Modern, utility-first styling
-- **Google Fonts** - Space Grotesk, Inter, Poppins
+- **Axios** - HTTP client for API requests
 
 ### Backend
 - **FastAPI** - High-performance Python API
 - **MongoDB Atlas** - Cloud database
 - **Groq AI** - AI-powered alert generation
-- **Twilio** - WhatsApp messaging integration
+- **WaAPI** - WhatsApp messaging integration
+- **Cloudinary** - Cloud image hosting
 
 ## 📦 Installation
 
@@ -35,8 +37,9 @@
 - Node.js 18+ and npm
 - Python 3.11+
 - MongoDB Atlas account
-- Twilio account (for WhatsApp)
+- WaAPI account (for WhatsApp)
 - Groq API key
+- Cloudinary account (for image hosting)
 
 ### Quick Start
 
@@ -66,7 +69,7 @@ python main.py
 cd frontend
 npm install
 
-# Create .env.local file (copy from .env.example)
+# Create .env.local file
 cp .env.example .env.local
 # Edit .env.local with your API URL
 
@@ -87,11 +90,19 @@ npm run dev
 ```env
 MONGODB_URL=your_mongodb_connection_string
 GROQ_API_KEY=your_groq_api_key
-TWILIO_ACCOUNT_SID=your_twilio_sid
-TWILIO_AUTH_TOKEN=your_twilio_token
-TWILIO_WHATSAPP_NUMBER=+14155238886
+
+# WhatsApp Configuration (WaAPI)
+WHATSAPP_PROVIDER=waapi
+WAAPI_TOKEN=your_waapi_token
+WAAPI_INSTANCE_URL=https://waapi.app/api/v1/instances/YOUR_INSTANCE_ID
+
+# Cloudinary Configuration
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+
 BACKEND_PORT=8001
-ALERT_PHONE_NUMBERS=+1234567890,+0987654321
+ALERT_PHONE_NUMBERS=923001234567,923009876543
 ```
 
 **Frontend (.env.local)**
@@ -101,13 +112,26 @@ NEXT_PUBLIC_API_URL=http://localhost:8001
 
 ## 📱 WhatsApp Integration
 
-### Twilio Sandbox Setup
-1. Go to [Twilio Console](https://console.twilio.com/)
-2. Navigate to WhatsApp Sandbox
-3. Send "join [your-code]" to +1 415 523 8886 on WhatsApp
-4. Add recipient numbers to `ALERT_PHONE_NUMBERS` in backend .env
+### WaAPI Setup
+1. Sign up at [WaAPI](https://waapi.app/)
+2. Create a WhatsApp instance
+3. Get your API token from Settings → API Token
+4. Copy your instance URL (format: `https://waapi.app/api/v1/instances/YOUR_INSTANCE_ID`)
+5. Add credentials to backend `.env` file
+6. Configure alert recipient phone numbers (format: `923001234567` without + sign)
 
-**Note:** Twilio sandbox has a 5 messages/day limit. Upgrade to production for unlimited messages.
+**Note:** Trial instances have limitations (10 actions per 5 minutes, limited recipients). Upgrade for production use.
+
+For detailed setup instructions, see [WAAPI_SETUP.md](./WAAPI_SETUP.md)
+
+## 🖼️ Image Hosting
+
+Images are automatically uploaded to Cloudinary for reliable WhatsApp delivery:
+
+1. Sign up at [Cloudinary](https://cloudinary.com/users/register_free)
+2. Get your credentials from the dashboard
+3. Add to backend `.env` file
+4. Images will be automatically uploaded and accessible via public URLs
 
 ## 🚢 Deployment
 
@@ -132,7 +156,7 @@ FindChildd/
 │   ├── database.py          # MongoDB connection
 │   ├── models.py            # Data models
 │   ├── agent.py             # AI alert generation
-│   ├── whatsapp_twilio.py   # WhatsApp integration
+│   ├── whatsapp_waapi.py    # WhatsApp integration
 │   ├── requirements.txt     # Python dependencies
 │   └── .env.example         # Environment template
 ├── frontend/
@@ -143,7 +167,7 @@ FindChildd/
 │   │   │   ├── cases/             # Cases pages
 │   │   │   ├── report/            # Report form
 │   │   │   └── contact/           # Contact page
-│   │   └── components/            # Reusable components
+│   │   └── hooks/                 # Custom React hooks
 │   ├── package.json         # Node dependencies
 │   └── .env.example         # Environment template
 └── README.md
@@ -157,6 +181,7 @@ The UI is inspired by modern design principles with:
 - Rounded corners and smooth animations
 - Floating navigation header
 - Responsive mobile-first design
+- Scroll-triggered animations
 
 ## 🤝 Contributing
 
@@ -176,8 +201,9 @@ Contributions are welcome! Please follow these steps:
 
 - [Next.js](https://nextjs.org/) - React framework
 - [FastAPI](https://fastapi.tiangolo.com/) - Python web framework
-- [Twilio](https://www.twilio.com/) - WhatsApp messaging
+- [WaAPI](https://waapi.app/) - WhatsApp messaging
 - [Groq](https://groq.com/) - AI processing
+- [Cloudinary](https://cloudinary.com/) - Image hosting
 - [MongoDB Atlas](https://www.mongodb.com/atlas) - Database hosting
 - [Railway](https://railway.app/) - Deployment platform
 

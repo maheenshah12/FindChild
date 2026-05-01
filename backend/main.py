@@ -7,19 +7,37 @@ from datetime import datetime
 from typing import Optional
 import uuid
 import shutil
+import cloudinary
+import cloudinary.uploader
 
 from config import settings
 from database import init_db, cases_collection, responses_collection, whatsapp_groups_collection
 from models import MissingChildCase, CaseStatus, Gender, StatusUpdate
 from agent import generate_missing_alert
-from whatsapp_twilio import broadcast_to_groups
+from whatsapp_waapi import broadcast_to_groups_waapi, handle_incoming_message_waapi, get_waapi_status
 
 app = FastAPI(title="FindChildd API")
+
+# Configure Cloudinary if credentials are provided
+if settings.cloudinary_cloud_name and settings.cloudinary_api_key and settings.cloudinary_api_secret:
+    cloudinary.config(
+        cloud_name=settings.cloudinary_cloud_name,
+        api_key=settings.cloudinary_api_key,
+        api_secret=settings.cloudinary_api_secret
+    )
+    print("[INFO] Cloudinary configured for image uploads")
+else:
+    print("[WARNING] Cloudinary not configured - images will be stored locally")
 
 # CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:3001"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://localhost:3002",
+        "https://findchildd-frontend.onrender.com",  # Replace with your actual Render frontend URL
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -55,7 +73,7 @@ async def create_case(
     # Generate unique case ID
     case_id = f"MC{datetime.utcnow().strftime('%Y%m%d')}{str(uuid.uuid4())[:8].upper()}"
 
-    # Save photo
+    # Save photo locally first
     file_extension = photo.filename.split(".")[-1]
     photo_filename = f"{case_id}.{file_extension}"
     photo_path = os.path.join(settings.upload_dir, photo_filename)
@@ -63,7 +81,38 @@ async def create_case(
     with open(photo_path, "wb") as buffer:
         shutil.copyfileobj(photo.file, buffer)
 
-    photo_url = f"/uploads/{photo_filename}"
+    # Upload to Cloudinary if configured (for WhatsApp image access)
+    cloudinary_url = None
+    if settings.cloudinary_cloud_name:
+        try:
+            # Use unsigned upload with default preset
+            upload_result = cloudinary.uploader.unsigned_upload(
+                photo_path,
+                "ml_default",  # Default unsigned preset
+                cloud_name=settings.cloudinary_cloud_name,
+                folder="findchildd",
+                public_id=f"findchildd_{case_id}"
+            )
+            cloudinary_url = upload_result['secure_url']
+            print(f"[INFO] Image uploaded to Cloudinary: {cloudinary_url}")
+        except Exception as e:
+            print(f"[WARNING] Cloudinary upload failed: {e}")
+            print("[INFO] Trying signed upload...")
+            try:
+                # Fallback to signed upload
+                upload_result = cloudinary.uploader.upload(
+                    photo_path,
+                    public_id=f"findchildd/{case_id}",
+                    folder="findchildd"
+                )
+                cloudinary_url = upload_result['secure_url']
+                print(f"[INFO] Image uploaded to Cloudinary (signed): {cloudinary_url}")
+            except Exception as e2:
+                print(f"[ERROR] Both upload methods failed: {e2}")
+
+    # Use Cloudinary URL for WhatsApp, local URL for frontend
+    photo_url = f"/uploads/{photo_filename}"  # For frontend display
+    whatsapp_photo_url = cloudinary_url  # For WhatsApp messages
 
     # Create case document
     case_data = {
@@ -95,13 +144,28 @@ async def create_case(
     whatsapp_status = "not_attempted"
     whatsapp_error = None
 
-    # Broadcast to WhatsApp numbers via Twilio
+    # Broadcast to WhatsApp numbers via selected provider
     if phone_numbers:
         try:
-            # For testing: send without image (localhost URLs don't work with Twilio)
-            # full_photo_url = f"http://localhost:{settings.backend_port}{photo_url}"
-            results = await broadcast_to_groups(alert_message, None, phone_numbers)
-            print("[INFO] WhatsApp broadcast attempted")
+            # Use Cloudinary URL if available, otherwise try ngrok URL
+            full_photo_url = whatsapp_photo_url  # Cloudinary URL (publicly accessible)
+
+            if not full_photo_url and settings.public_base_url:
+                # Fallback to ngrok/public URL if Cloudinary not configured
+                full_photo_url = f"{settings.public_base_url}{photo_url}"
+                print(f"[INFO] Using ngrok/public image URL: {full_photo_url}")
+            elif full_photo_url:
+                print(f"[INFO] Using Cloudinary image URL: {full_photo_url}")
+            else:
+                print("[WARNING] No image URL available - message will be sent without image")
+
+            # Choose provider based on configuration
+            if settings.whatsapp_provider == "waapi":
+                results = await broadcast_to_groups_waapi(alert_message, full_photo_url, phone_numbers)
+                print("[INFO] WhatsApp broadcast attempted via WaAPI")
+            else:
+                print("[WARNING] WhatsApp provider not configured properly")
+                results = []
 
             # Check if any message was sent successfully
             if any(r.get("result", {}).get("status") == "sent" for r in results):
@@ -187,7 +251,8 @@ async def update_case_status(case_id: str, update: StatusUpdate):
         resolution_message = f"GOOD NEWS!\n\n{case['child_name']} has been found safe!\n\nThank you to everyone who helped share and search."
 
         if group_ids:
-            await broadcast_to_groups(resolution_message, None, group_ids)
+            if settings.whatsapp_provider == "waapi":
+                await broadcast_to_groups_waapi(resolution_message, None, group_ids)
 
     return {"success": True, "message": "Status updated"}
 
@@ -211,21 +276,36 @@ async def get_whatsapp_contacts():
         contact["_id"] = str(contact["_id"])
     return {"contacts": contacts}
 
+@app.get("/api/whatsapp/status")
+async def get_whatsapp_status():
+    """Get WhatsApp provider status"""
+    if settings.whatsapp_provider == "waapi":
+        status = await get_waapi_status()
+        return {
+            "provider": "waapi",
+            "status": status
+        }
+    else:
+        return {
+            "provider": "unknown",
+            "configured": False,
+            "message": "WhatsApp provider not configured"
+        }
+
 @app.post("/api/whatsapp/webhook")
 async def whatsapp_webhook(request: Request):
-    """Webhook to receive incoming WhatsApp messages from Twilio"""
-    from whatsapp_twilio import handle_incoming_message
+    """Webhook to receive incoming WhatsApp messages from WaAPI"""
 
-    form_data = await request.form()
-    from_number = form_data.get("From", "").replace("whatsapp:", "")
-    message_body = form_data.get("Body", "")
+    if settings.whatsapp_provider != "waapi":
+        return {"status": "error", "message": "Only WaAPI webhooks are supported"}
 
-    print(f"Received WhatsApp message from {from_number}: {message_body}")
-
-    # TODO: Extract case_id from message context or database lookup
-    # For now, just log the message
-
-    return {"status": "received"}
+    try:
+        webhook_data = await request.json()
+        result = await handle_incoming_message_waapi(webhook_data)
+        return result
+    except Exception as e:
+        print(f"[ERROR] WaAPI webhook error: {e}")
+        return {"status": "error", "error": str(e)}
 
 @app.post("/api/contact")
 async def submit_contact_form(

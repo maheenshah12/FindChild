@@ -20,11 +20,14 @@ async def generate_missing_alert(case_data: dict) -> str:
     - Parent Contact: {case_data['parent_phone']}
 
     Create a message that:
-    1. Starts with "🚨 MISSING CHILD ALERT 🚨"
+    1. Starts with "*** MISSING CHILD ALERT ***"
     2. Includes all key details
     3. Asks people to share if they have any information
     4. Provides contact information
     5. Is concise but complete (max 200 words)
+    6. CRITICAL: Use ONLY plain ASCII text - NO emojis, NO special Unicode characters, NO symbols
+    7. Use asterisks (*) for emphasis instead of emojis
+    8. Use simple punctuation only: periods, commas, exclamation marks, question marks
 
     Format for WhatsApp sharing.
     """
@@ -43,7 +46,7 @@ async def generate_missing_alert(case_data: dict) -> str:
         return response.choices[0].message.content.strip()
     except Exception as e:
         # Fallback to template if API fails
-        return f"""🚨 MISSING CHILD ALERT 🚨
+        return f"""*** MISSING CHILD ALERT ***
 
 Name: {case_data['child_name']}
 Age: {case_data['age']} years old
@@ -53,7 +56,7 @@ Last Seen: {case_data['last_seen_location']}
 Description: {case_data['description']}
 
 If you have ANY information about this child, please contact:
-📞 {case_data['parent_phone']}
+Phone: {case_data['parent_phone']}
 
 Please share this message in your groups. Every share could help bring this child home safely.
 

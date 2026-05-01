@@ -23,6 +23,49 @@ export default function ReportPage() {
 
     const formData = new FormData(e.currentTarget)
 
+    // Additional validation
+    const childName = formData.get('child_name') as string
+    const parentName = formData.get('parent_name') as string
+    const description = formData.get('description') as string
+    const location = formData.get('last_seen_location') as string
+    const phone = formData.get('parent_phone') as string
+
+    // Validate names contain actual words (not just dots or special characters)
+    const namePattern = /^[a-zA-Z\s]{2,}$/
+    if (!namePattern.test(childName.trim())) {
+      setError("Child's name must contain only letters and spaces (minimum 2 characters)")
+      setLoading(false)
+      return
+    }
+
+    if (!namePattern.test(parentName.trim())) {
+      setError("Your name must contain only letters and spaces (minimum 2 characters)")
+      setLoading(false)
+      return
+    }
+
+    // Validate description contains meaningful text
+    if (description.trim().length < 10 || !/[a-zA-Z]{5,}/.test(description)) {
+      setError("Description must contain meaningful text (at least 10 characters with actual words)")
+      setLoading(false)
+      return
+    }
+
+    // Validate location contains actual words
+    if (location.trim().length < 3 || !/[a-zA-Z]{3,}/.test(location)) {
+      setError("Location must contain actual place name (minimum 3 characters)")
+      setLoading(false)
+      return
+    }
+
+    // Validate phone number is exactly 11 digits
+    const phoneDigits = phone.replace(/\D/g, '')
+    if (phoneDigits.length !== 11) {
+      setError("Phone number must be exactly 11 digits (e.g., 03001234567)")
+      setLoading(false)
+      return
+    }
+
     try {
       const response = await axios.post(`${API_URL}/api/cases`, formData, {
         headers: {
@@ -128,9 +171,14 @@ export default function ReportPage() {
                   type="text"
                   name="child_name"
                   required
+                  minLength={2}
+                  pattern="[a-zA-Z\s]+"
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition text-gray-900"
                   placeholder="Enter child's name"
                 />
+                <p className="text-sm text-gray-500 mt-2">
+                  Letters and spaces only (minimum 2 characters)
+                </p>
               </div>
 
               <div className="grid md:grid-cols-2 gap-6">
@@ -174,9 +222,14 @@ export default function ReportPage() {
                   type="text"
                   name="last_seen_location"
                   required
+                  minLength={3}
+                  pattern=".*[a-zA-Z]{3,}.*"
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition text-gray-900"
                   placeholder="e.g., Central Park, New York"
                 />
+                <p className="text-sm text-gray-500 mt-2">
+                  Enter actual place name (minimum 3 characters)
+                </p>
               </div>
 
               <div>
@@ -186,12 +239,13 @@ export default function ReportPage() {
                 <textarea
                   name="description"
                   required
+                  minLength={10}
                   rows={6}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition text-gray-900 resize-none"
                   placeholder="Physical description, clothing worn, any distinguishing features..."
                 />
                 <p className="text-sm text-gray-500 mt-2">
-                  Include details about clothing, physical features, and any other identifying information
+                  Provide detailed description with actual words (minimum 10 characters)
                 </p>
               </div>
 
@@ -231,24 +285,31 @@ export default function ReportPage() {
                   type="text"
                   name="parent_name"
                   required
+                  minLength={2}
+                  pattern="[a-zA-Z\s]+"
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition text-gray-900"
                   placeholder="Your name"
                 />
+                <p className="text-sm text-gray-500 mt-2">
+                  Letters and spaces only (minimum 2 characters)
+                </p>
               </div>
 
               <div>
                 <label className="block text-sm font-semibold text-gray-900 mb-2">
-                  Phone number (with country code) *
+                  Phone number (11 digits) *
                 </label>
                 <input
                   type="tel"
                   name="parent_phone"
                   required
+                  pattern="[0-9]{11}"
+                  maxLength={11}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition text-gray-900"
-                  placeholder="+1234567890"
+                  placeholder="03001234567"
                 />
                 <p className="text-sm text-gray-500 mt-2">
-                  Include country code for WhatsApp alerts
+                  Enter exactly 11 digits (e.g., 03001234567)
                 </p>
               </div>
 
