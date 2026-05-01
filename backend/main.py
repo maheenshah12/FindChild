@@ -36,7 +36,8 @@ app.add_middleware(
         "http://localhost:3000",
         "http://localhost:3001",
         "http://localhost:3002",
-        "https://findchildd-frontend.onrender.com",  # Replace with your actual Render frontend URL
+        "https://*.up.railway.app",  # Allow all Railway frontend URLs
+        "https://*.railway.app",      # Alternative Railway domain
     ],
     allow_credentials=True,
     allow_methods=["*"],
