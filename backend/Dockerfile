@@ -1,11 +1,6 @@
-FROM python:3.10-slim
+FROM python:3.10
 
 WORKDIR /app
-
-# Install system dependencies including SSL certificates
-RUN apt-get update && apt-get install -y \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements and install dependencies
 COPY requirements.txt .
