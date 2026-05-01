@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import axios from 'axios'
@@ -21,7 +21,7 @@ interface Case {
   created_at: string
 }
 
-export default function CasesPage() {
+function CasesContent() {
   const searchParams = useSearchParams()
   const status = searchParams.get('status') || 'active'
 
@@ -183,5 +183,18 @@ export default function CasesPage() {
         )}
       </section>
     </div>
+  )
+}
+
+export default function CasesPage() {
+  return (
+    <Suspense fallback={
+      <div className="text-center py-24">
+        <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+        <p className="mt-6 text-gray-600">Loading cases...</p>
+      </div>
+    }>
+      <CasesContent />
+    </Suspense>
   )
 }
