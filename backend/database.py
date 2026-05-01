@@ -1,7 +1,17 @@
 from motor.motor_asyncio import AsyncIOMotorClient
 from config import settings
+import ssl
 
-client = AsyncIOMotorClient(settings.mongodb_url)
+# Configure SSL for MongoDB Atlas
+ssl_context = ssl.create_default_context()
+ssl_context.check_hostname = False
+ssl_context.verify_mode = ssl.CERT_NONE
+
+client = AsyncIOMotorClient(
+    settings.mongodb_url,
+    tls=True,
+    tlsAllowInvalidCertificates=True
+)
 db = client.findchildd
 
 # Collections
