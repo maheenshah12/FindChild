@@ -14,7 +14,7 @@ export default function ReportPage() {
   const [preview, setPreview] = useState<string | null>(null)
 
   const header = useScrollAnimation()
-  const form = useScrollAnimation()
+  const form = useScrollAnimation<HTMLFormElement>()
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
