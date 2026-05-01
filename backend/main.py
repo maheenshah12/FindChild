@@ -37,8 +37,9 @@ app.add_middleware(
         "http://localhost:3001",
         "http://localhost:3002",
         "https://*.up.railway.app",     # Railway frontend
-        "https://*.railway.app",         # Railway alternative domain
+        "https://*.railway.app",         # Railway alternative
         "https://*.onrender.com",        # Render frontend
+        "https://*.vercel.app",          # Vercel frontend
     ],
     allow_credentials=True,
     allow_methods=["*"],
