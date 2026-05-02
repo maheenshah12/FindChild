@@ -141,7 +141,7 @@ function CasesContent() {
                     >
                       <div className="relative h-80 overflow-hidden bg-gray-100">
                         <img
-                          src={`${API_URL}${caseItem.photo_url}`}
+                          src={caseItem.photo_url.startsWith('http') ? caseItem.photo_url : `${API_URL}${caseItem.photo_url}`}
                           alt={caseItem.child_name}
                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                         />

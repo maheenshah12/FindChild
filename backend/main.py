@@ -112,8 +112,14 @@ async def create_case(
             except Exception as e2:
                 print(f"[ERROR] Both upload methods failed: {e2}")
 
-    # Use Cloudinary URL for WhatsApp, local URL for frontend
-    photo_url = f"/uploads/{photo_filename}"  # For frontend display
+    # Use Cloudinary URL if available (for production), otherwise use local path (for development)
+    if cloudinary_url:
+        photo_url = cloudinary_url  # Use Cloudinary URL for both frontend and WhatsApp
+        print(f"[INFO] Using Cloudinary URL in database: {photo_url}")
+    else:
+        photo_url = f"/uploads/{photo_filename}"  # Fallback to local path for development
+        print(f"[INFO] Using local path in database: {photo_url}")
+
     whatsapp_photo_url = cloudinary_url  # For WhatsApp messages
 
     # Create case document

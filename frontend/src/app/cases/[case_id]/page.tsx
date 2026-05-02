@@ -147,7 +147,7 @@ export default function CaseDetailPage() {
           <div>
             <div className="bg-gray-100 overflow-hidden">
               <img
-                src={`${API_URL}${caseData.photo_url}`}
+                src={caseData.photo_url.startsWith('http') ? caseData.photo_url : `${API_URL}${caseData.photo_url}`}
                 alt={caseData.child_name}
                 className="w-full h-auto"
               />
